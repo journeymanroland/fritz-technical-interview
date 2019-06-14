@@ -1,70 +1,81 @@
 # Lucky Dollar Store Coding Challenge
 import random
-names = ["Eric", "Chris", "Dan", "Jameson"]
-		
 
-def record_customer_purchase(customer):
-     # Fill this in
-     print("- Added new raffle ticket for \"%s\"" % customer)
-     return customer
+class Raffle(object):
+
+    def __init__(self):
+        super(Raffle, self).__init__()
+        self.pool = []
+        self.cant_win_again = {}
+        self.num_drawings = 1
+
+    def record_customer_purchase(self, customer):
+        print("- Added new raffle ticket for \"%s\"" % customer)
+        self.pool.append(customer)
+        return customer
+
+    def draw_winners(self, num_winners):
+        # pick winner(s)
+        winning_customer = []
+        # people ineligible to win aren't put into the pool of possible winners
+        temp_pool = list(filter(lambda x: can_win(x, self.cant_win_again), self.pool)) 
+        if num_winners <= len(temp_pool):
+            for i in range(0, num_winners):
+                winner_index = random.randrange(0, len(temp_pool))
+                winner = temp_pool.pop(winner_index)
+                winning_customer.append(winner)
+            return winning_customer
+        else:
+            return temp_pool
+
+    def run_weekly_raffle(self, num_winners):
+        winners = self.draw_winners(num_winners)
+        print("Raffle Drawing %d" % self.num_drawings)
+
+        # same winner can't win in same drawing
+        winners = list(set(winners))
+
+        print("- Picking the weekly winner….", end = " ")
+
+        if not winners:
+            print("No one :(")
+        else:
+            for winner in winners:
+                print(winner, end = " ")
+                self.cant_win_again.update({winner: 4})
+
+        # decrement number of raffles until winner can win again
+        for c in self.cant_win_again:
+            if self.cant_win_again[c] != 0:
+                self.cant_win_again[c] -= 1
+
+        # increment number of drawings 
+        self.num_drawings += 1
 
 
 def can_win(customer, pool):
-	if not pool:  
-		return True
-	elif customer in pool.keys():
-		if pool[customer] == 0:
-			return True
-	elif customer not in pool.keys():
-		return True
-	return False
+    num_raffles_before_eligible = pool.get(customer)
+    if not num_raffles_before_eligible or num_raffles_before_eligible == 0:
+        return True
+    else:
+        return False
 
-
-def run_weekly_raffle(num_winners, num_purchases):
-	# pick winner(s)
-	pool = []
-	winning_customer = []
-	for n in range(0, num_purchases):
-		customer_index = random.randrange(0, len(names))
-		pool.append(record_customer_purchase(names[customer_index]))
-	
-	for i in range(0, num_winners):
-		winner_index = random.randrange(0, len(pool))
-		winner = pool[winner_index]
-		winning_customer.append(winner)
-	return winning_customer
 
 def main():
-	pool = []
-	num_drawings = 6
-	cant_win_again = {}
-	for i in range(1, num_drawings + 1):	
-		print("Raffle Drawing %d" % i)
-		num_purchases = random.randrange(1,5)
-		winners = list(set(run_weekly_raffle(2, num_purchases))) # same winner can't win in same drawing
-		print("- Picking the weekly winner….", end = " ")
-		# how many winners to print
-		if len(winners) == 1 and can_win(winners[0], cant_win_again):
-			print(winners[0])
-			cant_win_again.update({winners[0]:3})
-		elif len(winners) > 1:
-			# for j in range(0, len(winners)-1):
-			# 	if can_win(winners[j]):
-			# 		pass
-			# 	print(winners[j], end = " & ")
-			# 	#winners[j].win()
-			# print(winners[len(winners) - 1])
-			for winner in winners:
-				if can_win(winner, cant_win_again):
-					print(winner)
-					cant_win_again.update({winner:3})
-		else:
-			print("No one :(")
-		# decrement number of raffles left until winner can win again
-		for c in cant_win_again:
-			if cant_win_again[c] == 0:
-				cant_win_again[c] = 3
-			else:
-				cant_win_again[c] = cant_win_again[c] - 1
+    raffle = Raffle()
+    raffle.record_customer_purchase("Hally")
+    raffle.record_customer_purchase("Jerry")
+    raffle.record_customer_purchase("Bill")
+    raffle.record_customer_purchase("Roland")
+    raffle.run_weekly_raffle(2)
+    raffle.run_weekly_raffle(1)
+    raffle.record_customer_purchase("Eric")
+    raffle.record_customer_purchase("Jameson")
+    raffle.run_weekly_raffle(3)
+    raffle.run_weekly_raffle(2)
+    for x in range(1,10):
+        raffle.run_weekly_raffle(1)
+
+
 if __name__ == '__main__':
-	main()
+    main()
