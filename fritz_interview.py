@@ -20,20 +20,20 @@ class Raffle(object):
         # people ineligible to win aren't put into the pool of possible winners
         temp_pool = list(filter(lambda x: can_win(x, self.cant_win_again), self.pool)) 
         if num_winners <= len(temp_pool):
-            for i in range(0, num_winners):
-                winner_index = random.randrange(0, len(temp_pool))
-                winner = temp_pool.pop(winner_index)
-                winning_customer.append(winner)
+            while len(winning_customer) < num_winners:
+                winner = random.choice(temp_pool)
+                if winner not in winning_customer:
+                    winning_customer.append(winner)
             return winning_customer
         else:
             return temp_pool
 
     def run_weekly_raffle(self, num_winners):
         winners = self.draw_winners(num_winners)
+        print(winners)
         print("Raffle Drawing %d" % self.num_drawings)
 
         # same winner can't win in same drawing
-        winners = list(set(winners))
 
         print("- Picking the weekly winner….", end = " ")
 
@@ -64,17 +64,16 @@ def can_win(customer, pool):
 def main():
     raffle = Raffle()
     raffle.record_customer_purchase("Hally")
+    raffle.record_customer_purchase("Hally")
+    raffle.record_customer_purchase("Hally")
+    raffle.record_customer_purchase("Hally")
+    raffle.record_customer_purchase("Hally")
+    raffle.record_customer_purchase("Hally")
     raffle.record_customer_purchase("Jerry")
     raffle.record_customer_purchase("Bill")
     raffle.record_customer_purchase("Roland")
-    raffle.run_weekly_raffle(2)
-    raffle.run_weekly_raffle(1)
-    raffle.record_customer_purchase("Eric")
-    raffle.record_customer_purchase("Jameson")
-    raffle.run_weekly_raffle(3)
-    raffle.run_weekly_raffle(2)
-    for x in range(1,10):
-        raffle.run_weekly_raffle(1)
+    raffle.run_weekly_raffle(4)
+
 
 
 if __name__ == '__main__':
